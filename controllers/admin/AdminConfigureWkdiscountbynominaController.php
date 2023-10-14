@@ -26,6 +26,15 @@ class AdminConfigureWkdiscountbynominaController extends ModuleAdminController
 
         parent::__construct();
 
+        $statuses = OrderState::getOrderStates((int) $this->context->language->id);
+        $list = [];
+        foreach ($statuses as $status) {
+            $list[] = [
+                'id' => $status['id_order_state'],
+                'name' => $status['name'],
+            ];
+        }
+
         $this->fields_options = [
             $this->module->name => [
                 'fields' => [
@@ -35,6 +44,13 @@ class AdminConfigureWkdiscountbynominaController extends ModuleAdminController
                         'validation' => 'isBool',
                         'cast' => 'intval',
                         'required' => false,
+                    ],
+                    Wkdiscountbynomina::PAYMENT_DISCOUNT_STATUS_ORDER => [
+                        'type' => 'select',
+                        'title' => $this->trans('Order status after paying'),
+                        'list' => $list,
+                        'required' => true,
+                        'identifier' => 'id',
                     ],
                 ],
                 'submit' => [

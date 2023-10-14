@@ -131,7 +131,7 @@ class WkdiscountbynominaValidationModuleFrontController extends ModuleFrontContr
 
         switch ($option) {
             case 'discount':
-                $orderStateId = (int) Configuration::get(Wkdiscountbynomina::PAYMENT_DISCOUNT);
+                $orderStateId = (int) Configuration::get(Wkdiscountbynomina::PAYMENT_DISCOUNT_STATUS_ORDER);
                 break;
         }
 
