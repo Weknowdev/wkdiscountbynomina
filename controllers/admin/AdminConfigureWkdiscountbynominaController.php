@@ -57,7 +57,7 @@ class AdminConfigureWkdiscountbynominaController extends ModuleAdminController
                         'identifier' => 'limit',
                         'type' => 'text',
                         'class' => 'fixed-width-xl',
-                        'suffix' => $this->l('CPL'), // Sufijo después del campo
+                        'suffix' => $this->l('CLP'), // Sufijo después del campo
                         'required' => true,
                     ],
                 ],
