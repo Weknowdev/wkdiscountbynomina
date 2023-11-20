@@ -28,6 +28,7 @@ class Wkdiscountbynomina  extends PaymentModule
 {
     const PAYMENT_DISCOUNT_STATUS_ORDER = 'PAYMENT_DISCOUNT_STATUS_ORDER';
     const PAYMENT_DISCOUNT_ENABLE = 'PAYMENT_DISCOUNT_ENABLE';
+    const PAYMENT_LIMIT_MONTH = 'PAYMENT_LIMIT_MONTH';
 
     const MODULE_ADMIN_CONTROLLER = 'AdminConfigureWkdiscountbynomina';
     const HOOKS = [
@@ -47,7 +48,7 @@ class Wkdiscountbynomina  extends PaymentModule
     {
         $this->name = 'wkdiscountbynomina';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'Weknowdev S.R.L';
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
@@ -149,7 +150,26 @@ class Wkdiscountbynomina  extends PaymentModule
 
         $paymentOptions = [];
 
-        if (Configuration::get(static::PAYMENT_DISCOUNT_ENABLE)) {
+        //MontoEstablecidoComprames = Config-TopeMaximoCompraMesNomina  or *TopeMaximoCompraMesNominaEmpresa
+        $montoEstablecidoComprames = Configuration::get(static::PAYMENT_LIMIT_MONTH);
+
+        //Preguntas si estoy asociado a una empresa
+        //Si estoy asociado a la empresa  entonces pregunto si la empresa tiene permitido el pago por nomina
+        $companyAsociate = $this->getCompanyAsociate(Context::getContext()->customer->id);
+        if($companyAsociate && $companyAsociate['pago_nomina'] == 1){
+            $montoEstablecidoComprames = $companyAsociate['tope_maximo'];
+        }
+
+        //montogastadonominames = campo monto_gastado_nommes de la tabla wkuser
+        $montogastadonominames = $this->getMontoGastadoNominaMes(Context::getContext()->customer->id);
+
+        //Montodisponible de compra en mes = MontoEstablecidoComprames - montogastadonominames
+        $montodisponibleCompraMes = $montoEstablecidoComprames - $montogastadonominames;
+
+        $importePagado = $params['cart']->getOrderTotal();
+
+        //Si el Montodisponible > que monto total del pedido entonces permite la forma de pago
+        if($montodisponibleCompraMes > $importePagado && Configuration::get(static::PAYMENT_DISCOUNT_ENABLE)){
             $paymentOptions[] = $this->getDiscountPaymentOption();
         }
 
@@ -468,5 +488,36 @@ class Wkdiscountbynomina  extends PaymentModule
         }
 
         return true;
+    }
+
+    private function getMontoGastadoNominaMes($iduser)
+    {
+        $result = 0;
+
+        $sql = 'SELECT monto_gastado_nommes  FROM PREFIX_wkdsusers WHERE id_user = '. $iduser;
+
+        $monto = Db::getInstance()->executeS($sql);
+
+        if(isset($monto[0]['monto_gastado_nommes'])){
+            $result = $monto[0]['monto_gastado_nommes'];
+        }
+
+        return $result;
+    }
+
+    private function getCompanyAsociate($iduser)
+    {
+        $result = null;
+
+        $sql = 'SELECT c.pago_nomina,c.tope_maximo  FROM PREFIX_wkdscompany_worker AS cw INNER JOIN PREFIX_wkdscompany AS c 
+                ON cw.idcompany = c.id_wkdscompany WHERE iduser = '. $iduser;
+
+        $company = Db::getInstance()->executeS($sql);
+
+        if(isset($company[0])){
+            $result = $company[0];
+        }
+
+        return $result;
     }
 }
