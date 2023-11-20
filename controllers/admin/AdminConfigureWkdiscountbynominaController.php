@@ -53,8 +53,11 @@ class AdminConfigureWkdiscountbynominaController extends ModuleAdminController
                         'identifier' => 'id',
                     ],
                     Wkdiscountbynomina::PAYMENT_LIMIT_MONTH => [
-                        'type' => 'number',
-                        'title' => $this->trans('Maximum purchase limit per month'),
+                        'title' => $this->l('Maximum purchase limit per month'), // Texto antes del input
+                        'identifier' => 'limit',
+                        'type' => 'text',
+                        'class' => 'fixed-width-xl',
+                        'suffix' => $this->l('CPL'), // Sufijo después del campo
                         'required' => true,
                     ],
                 ],
