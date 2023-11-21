@@ -17,5 +17,5 @@
  *}
 
 <section id="wkdiscountbynomina-offline">
-  <p>{l s='Pago por descuento por planilla: el pedido se creará con un estado de pedido personalizado "Pago por descuento".' mod='wkdiscountbynomina'}</p>
+  <p>{l s='Pago por nómina: Se le descontará el importe del pedido en su próxima nómina".' mod='wkdiscountbynomina'}</p>
 </section>

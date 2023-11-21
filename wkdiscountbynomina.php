@@ -59,8 +59,8 @@ class Wkdiscountbynomina extends PaymentModule
             'external',
             'validation',
         ];
-        $this->displayName = $this->l('Pago por nomina');
-        $this->description = $this->l('Pago por nomina');
+        $this->displayName = $this->l('Pago por nómina');
+        $this->description = $this->l('Pago por nómina');
 
 
         parent::__construct();
@@ -153,9 +153,11 @@ class Wkdiscountbynomina extends PaymentModule
         //MontoEstablecidoComprames = Config-TopeMaximoCompraMesNomina  or *TopeMaximoCompraMesNominaEmpresa
         $montoEstablecidoComprames = Configuration::get(static::PAYMENT_LIMIT_MONTH);
 
+
         //Preguntas si estoy asociado a una empresa
         //Si estoy asociado a la empresa  entonces pregunto si la empresa tiene permitido el pago por nomina
         $companyAsociate = $this->getCompanyAsociate(Context::getContext()->customer->id);
+
         if ($companyAsociate && $companyAsociate['pago_nomina'] == 1) {
             if (is_numeric($companyAsociate['tope_maximo']) && $companyAsociate['tope_maximo'] > 0)
                 $montoEstablecidoComprames = $companyAsociate['tope_maximo'];
@@ -425,7 +427,7 @@ class Wkdiscountbynomina extends PaymentModule
     {
         $offlineOption = new PaymentOption();
         $offlineOption->setModuleName($this->name);
-        $offlineOption->setCallToActionText($this->l('Pago por descuento por planilla'));
+        $offlineOption->setCallToActionText($this->l('Pago por nómina'));
         $offlineOption->setAction($this->context->link->getModuleLink($this->name, 'validation', ['option' => 'discount'], true));
         $offlineOption->setAdditionalInformation($this->context->smarty->fetch('module:wkdiscountbynomina/views/templates/front/paymentOptionDiscount.tpl'));
         return $offlineOption;
@@ -498,7 +500,7 @@ class Wkdiscountbynomina extends PaymentModule
     {
         $result = 0;
 
-        $sql = 'SELECT monto_gastado_nommes  FROM PREFIX_wkdsusers WHERE id_user = ' . $iduser;
+        $sql = 'SELECT monto_gastado_nommes  FROM '._DB_PREFIX_.'wkdsusers WHERE id_user = ' . $iduser;
 
         $monto = Db::getInstance()->executeS($sql);
 
@@ -513,7 +515,7 @@ class Wkdiscountbynomina extends PaymentModule
     {
         $result = null;
 
-        $sql = 'SELECT c.pago_nomina,c.tope_maximo  FROM PREFIX_wkdscompany_worker AS cw INNER JOIN PREFIX_wkdscompany AS c 
+        $sql = 'SELECT c.pago_nomina,c.tope_maximo  FROM '._DB_PREFIX_.'wkdscompany_worker AS cw INNER JOIN '._DB_PREFIX_.'wkdscompany AS c 
                 ON cw.idcompany = c.id_wkdscompany WHERE iduser = ' . $iduser;
 
         $company = Db::getInstance()->executeS($sql);

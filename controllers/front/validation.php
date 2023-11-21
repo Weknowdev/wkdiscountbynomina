@@ -150,7 +150,7 @@ class WkdiscountbynominaValidationModuleFrontController extends ModuleFrontContr
 
         switch ($option) {
             case 'discount':
-                $name = $this->l('discount');
+                $name = $this->l('wkdiscountnomina');
                 break;
         }
 
