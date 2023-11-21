@@ -24,7 +24,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Wkdiscountbynomina  extends PaymentModule
+class Wkdiscountbynomina extends PaymentModule
 {
     const PAYMENT_DISCOUNT_STATUS_ORDER = 'PAYMENT_DISCOUNT_STATUS_ORDER';
     const PAYMENT_DISCOUNT_ENABLE = 'PAYMENT_DISCOUNT_ENABLE';
@@ -59,8 +59,8 @@ class Wkdiscountbynomina  extends PaymentModule
             'external',
             'validation',
         ];
-        $this->displayName = $this->l('Pago por descuento');
-        $this->description = $this->l('Pago por descuento por planilla');
+        $this->displayName = $this->l('Pago por nomina');
+        $this->description = $this->l('Pago por nomina');
 
 
         parent::__construct();
@@ -71,8 +71,8 @@ class Wkdiscountbynomina  extends PaymentModule
      */
     public function install()
     {
-        return (bool) parent::install()
-            && (bool) $this->registerHook(static::HOOKS)
+        return (bool)parent::install()
+            && (bool)$this->registerHook(static::HOOKS)
             && $this->installConfiguration()
             && $this->installTabs();
     }
@@ -82,7 +82,7 @@ class Wkdiscountbynomina  extends PaymentModule
      */
     public function uninstall()
     {
-        return (bool) parent::uninstall()
+        return (bool)parent::uninstall()
             && $this->uninstallConfiguration()
             && $this->uninstallTabs();
     }
@@ -124,13 +124,13 @@ class Wkdiscountbynomina  extends PaymentModule
             return;
         }
 
-        $this->addCheckboxCarrierRestrictionsForModule([(int) $shop->id]);
-        $this->addCheckboxCountryRestrictionsForModule([(int) $shop->id]);
+        $this->addCheckboxCarrierRestrictionsForModule([(int)$shop->id]);
+        $this->addCheckboxCountryRestrictionsForModule([(int)$shop->id]);
 
         if ($this->currencies_mode === 'checkbox') {
-            $this->addCheckboxCurrencyRestrictionsForModule([(int) $shop->id]);
+            $this->addCheckboxCurrencyRestrictionsForModule([(int)$shop->id]);
         } elseif ($this->currencies_mode === 'radio') {
-            $this->addRadioCurrencyRestrictionsForModule([(int) $shop->id]);
+            $this->addRadioCurrencyRestrictionsForModule([(int)$shop->id]);
         }
     }
 
@@ -156,8 +156,12 @@ class Wkdiscountbynomina  extends PaymentModule
         //Preguntas si estoy asociado a una empresa
         //Si estoy asociado a la empresa  entonces pregunto si la empresa tiene permitido el pago por nomina
         $companyAsociate = $this->getCompanyAsociate(Context::getContext()->customer->id);
-        if($companyAsociate && $companyAsociate['pago_nomina'] == 1){
-            $montoEstablecidoComprames = $companyAsociate['tope_maximo'];
+        if ($companyAsociate && $companyAsociate['pago_nomina'] == 1) {
+            if (is_numeric($companyAsociate['tope_maximo']) && $companyAsociate['tope_maximo'] > 0)
+                $montoEstablecidoComprames = $companyAsociate['tope_maximo'];
+        } else {
+            //sino esta asociado a una empresa o no tiene pago por nomina no se permite esto
+            return [];
         }
 
         //montogastadonominames = campo monto_gastado_nommes de la tabla wkuser
@@ -169,7 +173,7 @@ class Wkdiscountbynomina  extends PaymentModule
         $importePagado = $params['cart']->getOrderTotal();
 
         //Si el Montodisponible > que monto total del pedido entonces permite la forma de pago
-        if($montodisponibleCompraMes > $importePagado && Configuration::get(static::PAYMENT_DISCOUNT_ENABLE)){
+        if ($montodisponibleCompraMes > $importePagado && Configuration::get(static::PAYMENT_DISCOUNT_ENABLE)) {
             $paymentOptions[] = $this->getDiscountPaymentOption();
         }
 
@@ -179,11 +183,11 @@ class Wkdiscountbynomina  extends PaymentModule
     /**
      * This hook is used to display additional information on BO Order View, under Payment block
      *
-     * @since PrestaShop 1.7.7 This hook is replaced by displayAdminOrderMainBottom on migrated BO Order View
-     *
      * @param array $params
      *
      * @return string
+     * @since PrestaShop 1.7.7 This hook is replaced by displayAdminOrderMainBottom on migrated BO Order View
+     *
      */
     public function hookDisplayAdminOrderLeft(array $params)
     {
@@ -191,7 +195,7 @@ class Wkdiscountbynomina  extends PaymentModule
             return '';
         }
 
-        $order = new Order((int) $params['id_order']);
+        $order = new Order((int)$params['id_order']);
 
         if (false === Validate::isLoadedObject($order) || $order->module !== $this->name) {
             return '';
@@ -209,11 +213,11 @@ class Wkdiscountbynomina  extends PaymentModule
     /**
      * This hook is used to display additional information on BO Order View, under Payment block
      *
-     * @since PrestaShop 1.7.7 This hook replace displayAdminOrderLeft on migrated BO Order View
-     *
      * @param array $params
      *
      * @return string
+     * @since PrestaShop 1.7.7 This hook replace displayAdminOrderLeft on migrated BO Order View
+     *
      */
     public function hookDisplayAdminOrderMainBottom(array $params)
     {
@@ -221,7 +225,7 @@ class Wkdiscountbynomina  extends PaymentModule
             return '';
         }
 
-        $order = new Order((int) $params['id_order']);
+        $order = new Order((int)$params['id_order']);
 
         if (false === Validate::isLoadedObject($order) || $order->module !== $this->name) {
             return '';
@@ -434,7 +438,7 @@ class Wkdiscountbynomina  extends PaymentModule
      */
     private function installConfiguration()
     {
-        return (bool) Configuration::updateGlobalValue(static::PAYMENT_DISCOUNT_ENABLE, '0')
+        return (bool)Configuration::updateGlobalValue(static::PAYMENT_DISCOUNT_ENABLE, '0')
             && Configuration::updateGlobalValue(static::PAYMENT_DISCOUNT_STATUS_ORDER, '0');
     }
 
@@ -445,7 +449,7 @@ class Wkdiscountbynomina  extends PaymentModule
      */
     private function uninstallConfiguration()
     {
-        return (bool) Configuration::deleteByName(static::PAYMENT_DISCOUNT_ENABLE);
+        return (bool)Configuration::deleteByName(static::PAYMENT_DISCOUNT_ENABLE);
     }
 
     /**
@@ -469,7 +473,7 @@ class Wkdiscountbynomina  extends PaymentModule
             $this->displayName
         );
 
-        return (bool) $tab->add();
+        return (bool)$tab->add();
     }
 
     /**
@@ -479,12 +483,12 @@ class Wkdiscountbynomina  extends PaymentModule
      */
     public function uninstallTabs()
     {
-        $id_tab = (int) Tab::getIdFromClassName(static::MODULE_ADMIN_CONTROLLER);
+        $id_tab = (int)Tab::getIdFromClassName(static::MODULE_ADMIN_CONTROLLER);
 
         if ($id_tab) {
             $tab = new Tab($id_tab);
 
-            return (bool) $tab->delete();
+            return (bool)$tab->delete();
         }
 
         return true;
@@ -494,11 +498,11 @@ class Wkdiscountbynomina  extends PaymentModule
     {
         $result = 0;
 
-        $sql = 'SELECT monto_gastado_nommes  FROM PREFIX_wkdsusers WHERE id_user = '. $iduser;
+        $sql = 'SELECT monto_gastado_nommes  FROM PREFIX_wkdsusers WHERE id_user = ' . $iduser;
 
         $monto = Db::getInstance()->executeS($sql);
 
-        if(isset($monto[0]['monto_gastado_nommes'])){
+        if (isset($monto[0]['monto_gastado_nommes'])) {
             $result = $monto[0]['monto_gastado_nommes'];
         }
 
@@ -510,11 +514,11 @@ class Wkdiscountbynomina  extends PaymentModule
         $result = null;
 
         $sql = 'SELECT c.pago_nomina,c.tope_maximo  FROM PREFIX_wkdscompany_worker AS cw INNER JOIN PREFIX_wkdscompany AS c 
-                ON cw.idcompany = c.id_wkdscompany WHERE iduser = '. $iduser;
+                ON cw.idcompany = c.id_wkdscompany WHERE iduser = ' . $iduser;
 
         $company = Db::getInstance()->executeS($sql);
 
-        if(isset($company[0])){
+        if (isset($company[0])) {
             $result = $company[0];
         }
 
