@@ -162,6 +162,12 @@ class Wkdiscountbynomina extends PaymentModule
             if (is_numeric($companyAsociate['tope_maximo']) && $companyAsociate['tope_maximo'] > 0)
                 $montoEstablecidoComprames = $companyAsociate['tope_maximo'];
         } else {
+
+            //todo tengo que preguntar si el trabajador especificamente tiene permitido el pago por nomina
+            //Si tiene permitido el pago por nomina hago lo mismo que arriba en la linea 162, pregunto si hay un tome maximo definido
+            // y se lo pongo a monto establecido
+
+            //todo sino tiene permitido el pago por nomina enronces hago esto del return [] para que no muestre la forma de pago
             //sino esta asociado a una empresa o no tiene pago por nomina no se permite esto
             return [];
         }
