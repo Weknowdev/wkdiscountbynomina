@@ -154,22 +154,29 @@ class Wkdiscountbynomina extends PaymentModule
         $montoEstablecidoComprames = Configuration::get(static::PAYMENT_LIMIT_MONTH);
 
 
+        $iduser = Context::getContext()->customer->id;
         //Preguntas si estoy asociado a una empresa
         //Si estoy asociado a la empresa  entonces pregunto si la empresa tiene permitido el pago por nomina
-        $companyAsociate = $this->getCompanyAsociate(Context::getContext()->customer->id);
+        $companyAsociate = $this->getCompanyAsociate($iduser);
 
         if ($companyAsociate && $companyAsociate['pago_nomina'] == 1) {
             if (is_numeric($companyAsociate['tope_maximo']) && $companyAsociate['tope_maximo'] > 0)
                 $montoEstablecidoComprames = $companyAsociate['tope_maximo'];
         } else {
 
-            //todo tengo que preguntar si el trabajador especificamente tiene permitido el pago por nomina
-            //Si tiene permitido el pago por nomina hago lo mismo que arriba en la linea 162, pregunto si hay un tome maximo definido
+            //tengo que preguntar si el trabajador especificamente tiene permitido el pago por nomina
+            //Si tiene permitido el pago por nomina, pregunto si hay un tome maximo definido
             // y se lo pongo a monto establecido
-
-            //todo sino tiene permitido el pago por nomina enronces hago esto del return [] para que no muestre la forma de pago
-            //sino esta asociado a una empresa o no tiene pago por nomina no se permite esto
-            return [];
+            $worker = $this->getWorkerById($iduser);
+            if ($worker && $worker['pago_nomina_w'] == 1) {
+                if (is_numeric($worker['tope_maximo_w']) && $worker['tope_maximo_w'] > 0){
+                    $montoEstablecidoComprames = $worker['tope_maximo_w'];
+                }
+            }else{
+                //sino tiene permitido el pago por nomina enronces hago esto del return [] para que no muestre la forma de pago
+                //sino esta asociado a una empresa o no tiene pago por nomina no se permite esto
+                return [];
+            }
         }
 
         //montogastadonominames = campo monto_gastado_nommes de la tabla wkuser
@@ -523,6 +530,21 @@ class Wkdiscountbynomina extends PaymentModule
 
         $sql = 'SELECT c.pago_nomina,c.tope_maximo  FROM '._DB_PREFIX_.'wkdscompany_worker AS cw INNER JOIN '._DB_PREFIX_.'wkdscompany AS c 
                 ON cw.idcompany = c.id_wkdscompany WHERE iduser = ' . $iduser;
+
+        $company = Db::getInstance()->executeS($sql);
+
+        if (isset($company[0])) {
+            $result = $company[0];
+        }
+
+        return $result;
+    }
+
+    private function getWorkerById($iduser)
+    {
+        $result = null;
+
+        $sql = 'SELECT cw.pago_nomina_w,cw.tope_maximo_w  FROM '._DB_PREFIX_.'wkdscompany_worker AS cw WHERE cw.iduser = ' . $iduser;
 
         $company = Db::getInstance()->executeS($sql);
 
