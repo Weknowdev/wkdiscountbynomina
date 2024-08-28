@@ -48,7 +48,7 @@ class Wkdiscountbynomina extends PaymentModule
     {
         $this->name = 'wkdiscountbynomina';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'Weknowdev S.R.L';
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
@@ -155,20 +155,22 @@ class Wkdiscountbynomina extends PaymentModule
 
 
         $iduser = Context::getContext()->customer->id;
+        $worker = $this->getWorkerById($iduser);
         //Preguntas si estoy asociado a una empresa
         //Si estoy asociado a la empresa  entonces pregunto si la empresa tiene permitido el pago por nomina
         $companyAsociate = $this->getCompanyAsociate($iduser);
 
-        if ($companyAsociate && $companyAsociate['pago_nomina'] == 1) {
-            if (is_numeric($companyAsociate['tope_maximo']) && $companyAsociate['tope_maximo'] > 0)
+        if ($companyAsociate && $companyAsociate['pago_nomina'] == 1 && $worker && $worker['status'] == 0)
+        {
+            if (is_numeric($companyAsociate['tope_maximo']) && $companyAsociate['tope_maximo'] > 0){
                 $montoEstablecidoComprames = $companyAsociate['tope_maximo'];
+            }
         } else {
 
             //tengo que preguntar si el trabajador especificamente tiene permitido el pago por nomina
             //Si tiene permitido el pago por nomina, pregunto si hay un tome maximo definido
             // y se lo pongo a monto establecido
-            $worker = $this->getWorkerById($iduser);
-            if ($worker && $worker['pago_nomina_w'] == 1) {
+            if ($worker && $worker['pago_nomina_w'] == 1 && $worker['status'] == 0) {
                 if (is_numeric($worker['tope_maximo_w']) && $worker['tope_maximo_w'] > 0){
                     $montoEstablecidoComprames = $worker['tope_maximo_w'];
                 }
@@ -544,7 +546,7 @@ class Wkdiscountbynomina extends PaymentModule
     {
         $result = null;
 
-        $sql = 'SELECT cw.pago_nomina_w,cw.tope_maximo_w  FROM '._DB_PREFIX_.'wkdscompany_worker AS cw WHERE cw.iduser = ' . $iduser;
+        $sql = 'SELECT cw.pago_nomina_w,cw.tope_maximo_w,cw.status  FROM '._DB_PREFIX_.'wkdscompany_worker AS cw WHERE cw.deleted = 0 AND cw.iduser = ' . $iduser;
 
         $company = Db::getInstance()->executeS($sql);
 
