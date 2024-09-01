@@ -160,6 +160,8 @@ class Wkdiscountbynomina extends PaymentModule
         //Si estoy asociado a la empresa  entonces pregunto si la empresa tiene permitido el pago por nomina
         $companyAsociate = $this->getCompanyAsociate($iduser);
 
+        //todo , este algoritmo no me gusta, hay mejores formas de hacerlo, cuando se tenga tiempo hay que tocarlo
+        
         if ($companyAsociate && $companyAsociate['pago_nomina'] == 1 && $worker && $worker['status'] == 0)
         {
             if (is_numeric($companyAsociate['tope_maximo']) && $companyAsociate['tope_maximo'] > 0){
